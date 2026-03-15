@@ -1,0 +1,193 @@
+// A La Carte - Culinary Consulting Platform
+// Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
+  password       String?
+  image          String?
+  role           String    @default("CLIENT") // ADMIN, CLIENT, KITCHEN
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  accounts       Account[]
+  sessions       Session[]
+  assignedTasks  Task[]    @relation("AssignedTasks")
+  messages       Message[]
+  uploadedFiles  File[]    @relation("UploadedFiles")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   @default("restaurant") // restaurant, cafe, food_brand
+  createdAt DateTime         @default(now())
+  users     User[]
+  projects  Project[]
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("active") // active, completed, on_hold
+  startDate   DateTime?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  recipes     Recipe[]
+  menus       Menu[]
+  files       File[]
+  messages    Message[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Ingredient {
+  id          String   @id @default(cuid())
+  name        String
+  unit        String
+  costPerUnit Float
+  supplier    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  recipeIngredients RecipeIngredient[]
+}
+
+model Recipe {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  category      String?
+  prepTime      Int?     // minutes
+  instructions  String?
+  imageUrl      String?
+  notes         String?
+  projectId     String?
+  project       Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  recipeIngredients RecipeIngredient[]
+  menuItems     MenuItem[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model RecipeIngredient {
+  id          String    @id @default(cuid())
+  recipeId    String
+  recipe      Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredientId String
+  ingredient  Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  quantity    Float
+  unit        String
+  createdAt   DateTime  @default(now())
+
+  @@unique([recipeId, ingredientId])
+}
+
+model Menu {
+  id        String     @id @default(cuid())
+  name      String
+  projectId String
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  items     MenuItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model MenuItem {
+  id             String   @id @default(cuid())
+  menuId         String
+  menu           Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  recipeId       String
+  recipe         Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  dishName       String?
+  description    String?
+  sellingPrice   Float
+  calculatedCost Float?
+  profitMargin   Float?
+  foodCostPct    Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  projectId   String
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  status      String   @default("todo") // todo, in_progress, done
+  assignedToId String?
+  assignedTo  User?      @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model File {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  url       String
+  type      String?
+  uploadedById String?
+  uploadedBy User?   @relation("UploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+}
