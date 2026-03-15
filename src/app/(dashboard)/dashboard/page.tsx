@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canAccessProject } from "@/lib/auth-utils";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { FolderKanban, ChefHat, UtensilsCrossed, ListTodo } from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user) return null;
+  if (!session?.user) redirect("/login");
 
   const isDemo = session.user.id?.startsWith("demo-");
   let projects = 0,

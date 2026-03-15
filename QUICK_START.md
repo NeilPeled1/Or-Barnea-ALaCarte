@@ -25,7 +25,7 @@ A browser window will open. Sign in with GitHub, Google, or email.
 npx vercel deploy --prod
 ```
 
-When asked for a project name, use: **Or-Barnea-ALaCarte**
+When asked for a project name, use: **or-barnea-alacarte**
 
 ## 4. Add environment variables
 
@@ -37,7 +37,7 @@ When asked for a project name, use: **Or-Barnea-ALaCarte**
 |------|-------|
 | `DATABASE_URL` | Your Neon connection string |
 | `AUTH_SECRET` | Run `openssl rand -base64 32` and paste the result |
-| `NEXTAUTH_URL` | `https://Or-Barnea-ALaCarte.vercel.app` |
+| `NEXTAUTH_URL` | `https://or-barnea-alacarte.vercel.app` |
 
 4. Go to **Deployments** → ** Redeploy** (latest deployment)
 
@@ -50,7 +50,7 @@ DATABASE_URL="your-neon-connection-string" npx prisma db seed
 
 ## 6. Done
 
-Your app should be live at: **https://Or-Barnea-ALaCarte.vercel.app**
+Your app should be live at: **https://or-barnea-alacarte.vercel.app**
 
 Demo logins:
 - Admin: `admin@alacarte.com` / `admin123`

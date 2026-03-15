@@ -16,14 +16,14 @@ npx vercel login
 
 # 2. Create a Neon database at neon.tech, copy the connection string
 
-# 3. Deploy (use project name Or-Barnea-ALaCarte when prompted)
+# 3. Deploy (use project name or-barnea-alacarte when prompted)
 npx vercel deploy --prod
 ```
 
 Then in [Vercel Dashboard](https://vercel.com/dashboard) → your project → **Settings** → **Environment Variables**, add:
 - `DATABASE_URL` = your Neon connection string
 - `AUTH_SECRET` = run `openssl rand -base64 32`
-- `NEXTAUTH_URL` = `https://Or-Barnea-ALaCarte.vercel.app`
+- `NEXTAUTH_URL` = `https://or-barnea-alacarte.vercel.app`
 
 Redeploy, then run:
 ```bash
@@ -61,14 +61,14 @@ git push -u origin main
 1. Go to [vercel.com](https://vercel.com) and sign up with GitHub
 2. Click **Add New** → **Project**
 3. Import your GitHub repo
-4. Set **Project Name** to `Or-Barnea-ALaCarte` (so your URL is `https://Or-Barnea-ALaCarte.vercel.app`)
+4. Set **Project Name** to `or-barnea-alacarte` (so your URL is `https://or-barnea-alacarte.vercel.app`)
 5. Before deploying, add these **Environment Variables**:
 
 | Name | Value |
 |------|-------|
 | `DATABASE_URL` | Your Neon connection string from Step 1 |
 | `AUTH_SECRET` | Run `openssl rand -base64 32` and paste the output |
-| `NEXTAUTH_URL` | `https://Or-Barnea-ALaCarte.vercel.app` |
+| `NEXTAUTH_URL` | `https://or-barnea-alacarte.vercel.app` |
 
 6. Click **Deploy**
 
@@ -90,7 +90,7 @@ npx prisma db seed
 
 ## Step 5: Share Your Link
 
-Your app will be live at: **https://Or-Barnea-ALaCarte.vercel.app**
+Your app will be live at: **https://or-barnea-alacarte.vercel.app**
 
 Demo accounts (after seeding):
 - Admin: `admin@alacarte.com` / `admin123`
