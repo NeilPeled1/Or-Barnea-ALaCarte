@@ -15,14 +15,19 @@ export default async function MenusPage() {
         ? { project: { organizationId: session.user.organizationId } }
         : { projectId: { in: [] } };
 
-  const menus = await prisma.menu.findMany({
-    where,
-    include: {
-      project: { include: { organization: true } },
-      _count: { select: { items: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  let menus: { id: string; name: string; projectId: string; project?: { name: string; organization: { name: string } }; _count?: { items: number } }[] = [];
+  try {
+    menus = await prisma.menu.findMany({
+      where,
+      include: {
+        project: { include: { organization: true } },
+        _count: { select: { items: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch {
+    // Demo mode or DB not configured
+  }
 
   return (
     <div className="space-y-6">
@@ -42,12 +47,12 @@ export default async function MenusPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg">{menu.name}</CardTitle>
                   <CardContent className="p-0 text-sm text-muted-foreground">
-                    {menu.project.organization.name} · {menu.project.name}
+                    {menu.project?.organization?.name ?? "—"} · {menu.project?.name ?? "—"}
                   </CardContent>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    {menu._count.items} items
+                    {menu._count?.items ?? 0} items
                   </p>
                 </CardContent>
               </Card>

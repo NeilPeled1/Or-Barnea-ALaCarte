@@ -15,9 +15,14 @@ export default async function IngredientsPage() {
   const session = await auth();
   if (!session?.user) return null;
 
-  const ingredients = await prisma.ingredient.findMany({
+  let ingredients: Awaited<ReturnType<typeof prisma.ingredient.findMany>> = [];
+  try {
+    ingredients = await prisma.ingredient.findMany({
     orderBy: { name: "asc" },
   });
+  } catch {
+    // Demo mode or DB not configured
+  }
 
   return (
     <div className="space-y-6">

@@ -33,20 +33,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        });
-        if (!user || !user.password) return null;
-        const valid = await bcrypt.compare(credentials.password as string, user.password);
-        if (!valid) return null;
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-          organizationId: user.organizationId,
-        };
+
+        // Demo mode: works without database for easy sharing
+        const demoUsers = [
+          { email: "admin@alacarte.com", password: "admin123", name: "Admin", role: "ADMIN" as const },
+          { email: "client@bistro.com", password: "admin123", name: "Client", role: "CLIENT" as const },
+        ];
+        const demo = demoUsers.find(
+          (u) => u.email === credentials.email && u.password === credentials.password
+        );
+        if (demo) {
+          return { id: `demo-${demo.role.toLowerCase()}`, email: demo.email, name: demo.name, role: demo.role, organizationId: null };
+        }
+
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string },
+          });
+          if (!user || !user.password) return null;
+          const valid = await bcrypt.compare(credentials.password as string, user.password);
+          if (!valid) return null;
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            role: user.role,
+            organizationId: user.organizationId,
+          };
+        } catch {
+          return null;
+        }
       },
     }),
   ],

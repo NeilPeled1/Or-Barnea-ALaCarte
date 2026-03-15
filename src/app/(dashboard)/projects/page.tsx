@@ -19,7 +19,10 @@ export default async function ProjectsPage() {
         ? { organizationId: session.user.organizationId }
         : { id: "none" };
 
-  const projects = await prisma.project.findMany({
+  type ProjectWithOrg = { id: string; name: string; status: string; organization?: { name: string }; _count?: { tasks: number; recipes: number; menus: number } };
+  let projects: ProjectWithOrg[] = [];
+  try {
+    projects = await prisma.project.findMany({
     where,
     include: {
       organization: true,
@@ -27,6 +30,9 @@ export default async function ProjectsPage() {
     },
     orderBy: { updatedAt: "desc" },
   });
+  } catch {
+    // Demo mode or DB not configured
+  }
 
   return (
     <div className="space-y-6">
@@ -62,13 +68,13 @@ export default async function ProjectsPage() {
                     <CardTitle className="text-lg">{project.name}</CardTitle>
                     <Badge variant="secondary">{project.status}</Badge>
                   </div>
-                  <CardDescription>{project.organization.name}</CardDescription>
+                  <CardDescription>{project.organization?.name ?? "—"}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex gap-4 text-sm text-muted-foreground">
-                    <span>{project._count.tasks} tasks</span>
-                    <span>{project._count.recipes} recipes</span>
-                    <span>{project._count.menus} menus</span>
+                    <span>{project._count?.tasks ?? 0} tasks</span>
+                    <span>{project._count?.recipes ?? 0} recipes</span>
+                    <span>{project._count?.menus ?? 0} menus</span>
                   </div>
                 </CardContent>
               </Card>

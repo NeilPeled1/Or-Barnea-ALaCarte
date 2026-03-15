@@ -10,33 +10,46 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user) return null;
 
-  const where =
-    session.user.role === "ADMIN"
-      ? {}
-      : session.user.organizationId
-        ? { organizationId: session.user.organizationId }
-        : { id: "none" };
+  const isDemo = session.user.id?.startsWith("demo-");
+  let projects = 0,
+    recipes = 0,
+    menus = 0,
+    taskCount = 0;
+  let recentProjects: { id: string; name: string; organization: { name: string }; status: string; updatedAt: Date }[] = [];
 
-  const taskWhere =
-    session.user.role === "ADMIN"
-      ? {}
-      : session.user.organizationId
-        ? { project: { organizationId: session.user.organizationId } }
-        : { projectId: { in: [] } };
+  if (!isDemo) {
+    const where =
+      session.user.role === "ADMIN"
+        ? {}
+        : session.user.organizationId
+          ? { organizationId: session.user.organizationId }
+          : { id: "none" };
 
-  const [projects, recipes, menus, taskCount] = await Promise.all([
-    prisma.project.count({ where }),
-    prisma.recipe.count(),
-    prisma.menu.count({ where: { project: where } }),
-    prisma.task.count({ where: taskWhere }),
-  ]);
+    const taskWhere =
+      session.user.role === "ADMIN"
+        ? {}
+        : session.user.organizationId
+          ? { project: { organizationId: session.user.organizationId } }
+          : { projectId: { in: [] } };
 
-  const recentProjects = await prisma.project.findMany({
-    where,
-    take: 5,
-    include: { organization: true },
-    orderBy: { updatedAt: "desc" },
-  });
+    try {
+      [projects, recipes, menus, taskCount] = await Promise.all([
+        prisma.project.count({ where }),
+        prisma.recipe.count(),
+        prisma.menu.count({ where: { project: where } }),
+        prisma.task.count({ where: taskWhere }),
+      ]);
+
+      recentProjects = await prisma.project.findMany({
+        where,
+        take: 5,
+        include: { organization: true },
+        orderBy: { updatedAt: "desc" },
+      });
+    } catch {
+      // DB not configured - show empty state
+    }
+  }
 
   return (
     <div className="space-y-8">
