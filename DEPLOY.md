@@ -4,6 +4,26 @@ Deploy your app in ~10 minutes using **Vercel** (hosting) + **Neon** (database).
 
 ---
 
+## Quick Fix: Add Auth Env Vars & Redeploy
+
+If your app is already on Vercel but the dashboard shows a white screen after login:
+
+```bash
+cd a-la-carte
+
+# 1. Log in to Vercel (opens browser – do this once)
+npx vercel login
+
+# 2. Add AUTH_SECRET and redeploy (NEXTAUTH_URL not needed on Vercel)
+npm run setup:vercel
+```
+
+This adds AUTH_SECRET to all environments and redeploys.
+
+**Still not working?** In Vercel Dashboard → Settings → Environment Variables, ensure `AUTH_SECRET` exists for Production. Remove `NEXTAUTH_URL` if present (it can cause redirect issues). Redeploy after any change.
+
+---
+
 ## Quick Deploy (from Terminal)
 
 If you have the code locally and want to deploy without GitHub:

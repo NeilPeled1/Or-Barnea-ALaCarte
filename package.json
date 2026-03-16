@@ -6,6 +6,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "scripts": {
+    "setup:vercel": "bash scripts/setup-vercel-env.sh",
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",

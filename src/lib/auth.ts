@@ -21,6 +21,7 @@ declare module "next-auth" {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
+  // Vercel auto-detects URL; AUTH_SECRET must be set in production
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "demo-secret-replace-in-production",
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   pages: {

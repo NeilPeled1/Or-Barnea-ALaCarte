@@ -26,6 +26,7 @@ function LoginForm() {
     const res = await signIn("credentials", {
       email,
       password,
+      callbackUrl,
       redirect: false,
     });
     setLoading(false);
