@@ -9,6 +9,7 @@
     "setup:vercel": "bash scripts/setup-vercel-env.sh",
     "add-auth-secret": "bash scripts/add-auth-secret.sh",
     "add-auth-secret:api": "node scripts/add-env-via-api.mjs",
+    "import-data": "tsx scripts/import-from-files.ts",
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",

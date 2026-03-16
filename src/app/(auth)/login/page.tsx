@@ -38,7 +38,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30">
+    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-6">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex justify-center">
@@ -48,6 +48,7 @@ function LoginForm() {
               width={220}
               height={80}
               priority
+              unoptimized
               className="object-contain"
             />
           </div>
