@@ -4,10 +4,12 @@ import { canAccessProject } from "@/lib/auth-utils";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { calculateRecipeCost } from "@/lib/recipe-cost";
 import { CreateRecipeDialog } from "./create-recipe-dialog";
+import { SHEFFIELD_PROJECT_ID } from "@/data/sheffield-project";
+import { SHEFFIELD_RECIPES } from "@/data/sheffield-parsed";
+import { SheffieldRecipesView } from "./sheffield-recipes-view";
 
 export default async function ProjectRecipesPage({
   params,
@@ -18,6 +20,16 @@ export default async function ProjectRecipesPage({
   if (!session?.user) return null;
 
   const { id } = await params;
+
+  if (id === SHEFFIELD_PROJECT_ID) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold">Recipes</h2>
+        <SheffieldRecipesView recipes={SHEFFIELD_RECIPES} />
+      </div>
+    );
+  }
+
   const project = await prisma.project.findUnique({
     where: { id },
     include: { organization: true },
@@ -38,7 +50,7 @@ export default async function ProjectRecipesPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Recipes</h2>
-        <CreateRecipeDialog projectId={id} />
+        {project && <CreateRecipeDialog projectId={id} />}
       </div>
 
       {recipes.length === 0 ? (

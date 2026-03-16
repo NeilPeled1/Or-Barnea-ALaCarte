@@ -4,7 +4,10 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FolderKanban, ChefHat, UtensilsCrossed, ListTodo, BookOpen } from "lucide-react";
+import { FolderKanban, ChefHat, UtensilsCrossed, ListTodo, Plus } from "lucide-react";
+import { SHEFFIELD_PROJECT_ID, SHEFFIELD_PROJECT } from "@/data/sheffield-project";
+import { SHEFFIELD_RECIPES, SHEFFIELD_MENUS } from "@/data/sheffield-parsed";
+import { CreateTaskDialog } from "./create-task-dialog";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -16,6 +19,10 @@ export default async function DashboardPage() {
     menus = 0,
     taskCount = 0;
   let recentProjects: { id: string; name: string; organization: { name: string }; status: string; updatedAt: Date }[] = [];
+
+  projects = 1;
+  recipes = SHEFFIELD_RECIPES.length;
+  menus = SHEFFIELD_MENUS.length;
 
   if (!isDemo) {
     const where =
@@ -33,22 +40,36 @@ export default async function DashboardPage() {
           : { projectId: { in: [] } };
 
     try {
-      [projects, recipes, menus, taskCount] = await Promise.all([
+      const [dbProjects, dbRecipes, dbMenus, dbTasks] = await Promise.all([
         prisma.project.count({ where }),
         prisma.recipe.count(),
         prisma.menu.count({ where: { project: where } }),
         prisma.task.count({ where: taskWhere }),
       ]);
+      projects += dbProjects;
+      recipes += dbRecipes;
+      menus += dbMenus;
+      taskCount = dbTasks;
 
-      recentProjects = await prisma.project.findMany({
+      const dbRecent = await prisma.project.findMany({
         where,
         take: 5,
         include: { organization: true },
         orderBy: { updatedAt: "desc" },
       });
+      recentProjects = [
+        { id: SHEFFIELD_PROJECT_ID, name: SHEFFIELD_PROJECT.name, organization: { name: SHEFFIELD_PROJECT.organizationName }, status: SHEFFIELD_PROJECT.status, updatedAt: new Date() },
+        ...dbRecent,
+      ].slice(0, 5);
     } catch {
-      // DB not configured - show empty state
+      recentProjects = [
+        { id: SHEFFIELD_PROJECT_ID, name: SHEFFIELD_PROJECT.name, organization: { name: SHEFFIELD_PROJECT.organizationName }, status: SHEFFIELD_PROJECT.status, updatedAt: new Date() },
+      ];
     }
+  } else {
+    recentProjects = [
+      { id: SHEFFIELD_PROJECT_ID, name: SHEFFIELD_PROJECT.name, organization: { name: SHEFFIELD_PROJECT.organizationName }, status: SHEFFIELD_PROJECT.status, updatedAt: new Date() },
+    ];
   }
 
   return (
@@ -127,12 +148,7 @@ export default async function DashboardPage() {
               <Button asChild>
                 <Link href="/projects">View all projects</Link>
               </Button>
-              <Button asChild variant="outline">
-                <Link href="/sheffield" className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4" />
-                  Sheffield Bar docs
-                </Link>
-              </Button>
+              <CreateTaskDialog />
             </div>
         </CardContent>
       </Card>

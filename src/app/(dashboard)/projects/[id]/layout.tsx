@@ -4,6 +4,7 @@ import { canAccessProject } from "@/lib/auth-utils";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ProjectNav } from "./project-nav";
+import { SHEFFIELD_PROJECT_ID, SHEFFIELD_PROJECT_NAME, SHEFFIELD_ORG_NAME } from "@/data/sheffield-project";
 
 export default async function ProjectLayout({
   children,
@@ -16,6 +17,27 @@ export default async function ProjectLayout({
   if (!session?.user) redirect("/login");
 
   const { id } = await params;
+
+  if (id === SHEFFIELD_PROJECT_ID) {
+    const base = `/projects/${id}`;
+    return (
+      <div className="space-y-6">
+        <div>
+          <Link
+            href="/projects"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            ← Back to projects
+          </Link>
+          <h1 className="mt-1 text-2xl font-bold">{SHEFFIELD_PROJECT_NAME}</h1>
+          <p className="text-muted-foreground">{SHEFFIELD_ORG_NAME}</p>
+        </div>
+        <ProjectNav base={base} isSheffield />
+        {children}
+      </div>
+    );
+  }
+
   const project = await prisma.project.findUnique({
     where: { id },
     include: { organization: true },

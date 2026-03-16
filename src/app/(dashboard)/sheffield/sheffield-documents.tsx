@@ -8,6 +8,7 @@ import {
   type DocCategory,
 } from "@/data/sheffield-documents";
 import { FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { SearchInput } from "@/components/search-input";
 
 export function SheffieldDocuments({
   docs,
@@ -18,11 +19,26 @@ export function SheffieldDocuments({
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<DocCategory | "all">("all");
+  const [search, setSearch] = useState("");
 
-  const filtered = filter === "all" ? docs : docs.filter((d) => d.category === filter);
+  const byCategory = filter === "all" ? docs : docs.filter((d) => d.category === filter);
+  const filtered = !search
+    ? byCategory
+    : byCategory.filter(
+        (d) =>
+          d.title.toLowerCase().includes(search.toLowerCase()) ||
+          d.titleHe.includes(search) ||
+          d.content.toLowerCase().includes(search.toLowerCase())
+      );
 
   return (
     <div className="space-y-6">
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Search documents..."
+        className="max-w-sm"
+      />
       <div className="flex flex-wrap gap-2">
         <Button
           variant={filter === "all" ? "default" : "outline"}
@@ -68,6 +84,7 @@ function DocCard({
 }) {
   const lines = doc.content.split("\n").filter(Boolean);
   const hasMore = lines.length > 3;
+  const hasTabularData = lines.some((l) => l.includes("\t"));
 
   return (
     <Card className="overflow-hidden border border-border/50 bg-card shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md">
@@ -92,13 +109,22 @@ function DocCard({
       </CardHeader>
       {expanded && (
         <CardContent className="border-t border-border/50 pt-4">
-          <div
-            dir="rtl"
-            className="max-h-[60vh] overflow-y-auto rounded-lg border border-border/50 bg-muted/20 p-5 font-medium"
-          >
-            <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground/90">
-              {doc.content}
-            </pre>
+          <div dir="rtl" className="max-h-[60vh] overflow-y-auto rounded-lg border border-border/50 bg-muted/20 p-5 font-medium">
+            {hasTabularData ? (
+              <FormattedContent content={doc.content} />
+            ) : (
+              <div className="space-y-4">
+                {lines.map((line, i) => {
+                  if (line.startsWith("•") || line.match(/^\d+\./)) {
+                    return <p key={i} className="pl-4">{line}</p>;
+                  }
+                  if (line.match(/^[\d]+[\s\.]/) || line.match(/^[א-ת]+[\s\.]/)) {
+                    return <p key={i} className="font-medium">{line}</p>;
+                  }
+                  return <p key={i} className="text-sm leading-relaxed">{line}</p>;
+                })}
+              </div>
+            )}
           </div>
         </CardContent>
       )}
@@ -108,5 +134,51 @@ function DocCard({
         </CardContent>
       )}
     </Card>
+  );
+}
+
+function FormattedContent({ content }: { content: string }) {
+  const rawSections = content.split(/\n---\s*Sheet:/);
+  const sections = rawSections.length > 1 ? rawSections : [content];
+  return (
+    <div className="space-y-6">
+      {sections.map((section, si) => {
+        const lines = section.split("\n").filter(Boolean);
+        const isFirstWithHeader = rawSections.length > 1 && si > 0;
+        const header = isFirstWithHeader ? lines[0]?.replace(/^---\s*/, "").trim() : null;
+        const dataLines = isFirstWithHeader ? lines.slice(1) : lines;
+        const hasTabs = dataLines.some((l) => l.includes("\t"));
+        return (
+          <div key={si}>
+            {header && <h4 className="mb-2 font-semibold text-foreground">{header}</h4>}
+            {hasTabs ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <tbody>
+                    {dataLines.map((row, ri) => {
+                      const cells = row.split("\t");
+                      if (cells.length < 2) return <tr key={ri}><td colSpan={2}>{row}</td></tr>;
+                      return (
+                        <tr key={ri} className="border-b border-border/50">
+                          {cells.map((cell, ci) => (
+                            <td key={ci} className="py-1 pr-4">{cell.trim()}</td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <ul className="list-inside list-disc space-y-1">
+                {dataLines.map((line, ri) => (
+                  <li key={ri}>{line}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }

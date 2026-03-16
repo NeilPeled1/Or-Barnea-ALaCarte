@@ -2,11 +2,12 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus } from "lucide-react";
 import { CreateProjectDialog } from "./create-project-dialog";
 import { CreateOrganizationDialog } from "./create-organization-dialog";
+import { SHEFFIELD_PROJECT } from "@/data/sheffield-project";
+import { SHEFFIELD_RECIPES, SHEFFIELD_MENUS } from "@/data/sheffield-parsed";
+import { ProjectsList } from "./projects-list";
 
 export default async function ProjectsPage() {
   const session = await auth();
@@ -20,9 +21,9 @@ export default async function ProjectsPage() {
         : { id: "none" };
 
   type ProjectWithOrg = { id: string; name: string; status: string; organization?: { name: string }; _count?: { tasks: number; recipes: number; menus: number } };
-  let projects: ProjectWithOrg[] = [];
+  let dbProjects: ProjectWithOrg[] = [];
   try {
-    projects = await prisma.project.findMany({
+    dbProjects = await prisma.project.findMany({
     where,
     include: {
       organization: true,
@@ -33,6 +34,18 @@ export default async function ProjectsPage() {
   } catch {
     // Demo mode or DB not configured
   }
+
+  const sheffieldWithCounts = {
+    ...SHEFFIELD_PROJECT,
+    organization: { name: SHEFFIELD_PROJECT.organizationName },
+    _count: {
+      tasks: 0,
+      recipes: SHEFFIELD_RECIPES.length,
+      menus: SHEFFIELD_MENUS.length,
+    },
+  };
+
+  const projects = [sheffieldWithCounts, ...dbProjects];
 
   return (
     <div className="space-y-6">
@@ -59,28 +72,7 @@ export default async function ProjectsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <Link key={project.id} href={`/projects/${project.id}`}>
-              <Card className="transition-colors hover:bg-muted/50">
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{project.name}</CardTitle>
-                    <Badge variant="secondary">{project.status}</Badge>
-                  </div>
-                  <CardDescription>{project.organization?.name ?? "—"}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-4 text-sm text-muted-foreground">
-                    <span>{project._count?.tasks ?? 0} tasks</span>
-                    <span>{project._count?.recipes ?? 0} recipes</span>
-                    <span>{project._count?.menus ?? 0} menus</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <ProjectsList projects={projects} />
       )}
     </div>
   );

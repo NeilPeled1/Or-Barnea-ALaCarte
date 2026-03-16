@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const tabs = [
+const dbTabs = [
   { href: "", label: "Overview" },
   { href: "/recipes", label: "Recipes" },
   { href: "/menus", label: "Menus" },
@@ -13,7 +13,16 @@ const tabs = [
   { href: "/messages", label: "Messages" },
 ];
 
-export function ProjectNav({ base }: { base: string }) {
+const sheffieldTabs = [
+  { href: "", label: "Overview" },
+  { href: "/recipes", label: "Recipes" },
+  { href: "/menus", label: "Menus" },
+  { href: "/ingredients", label: "Ingredients" },
+  { href: "/documents", label: "Documents" },
+];
+
+export function ProjectNav({ base, isSheffield }: { base: string; isSheffield?: boolean }) {
+  const tabs = isSheffield ? sheffieldTabs : dbTabs;
   const pathname = usePathname();
 
   return (

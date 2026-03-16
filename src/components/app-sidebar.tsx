@@ -29,7 +29,7 @@ import { useState } from "react";
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projects", label: "Projects", icon: FolderKanban },
-  { href: "/sheffield", label: "Sheffield Bar", icon: BookOpen },
+  { href: "/projects/sheffield", label: "Sheffield Bar", icon: BookOpen },
   { href: "/recipes", label: "Recipes", icon: ChefHat },
   { href: "/ingredients", label: "Ingredients", icon: Wheat },
   { href: "/menus", label: "Menus", icon: UtensilsCrossed },

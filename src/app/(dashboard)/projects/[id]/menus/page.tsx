@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { calculateRecipeCost, calculateMenuItemMetrics } from "@/lib/recipe-cost";
 import { CreateMenuDialog } from "./create-menu-dialog";
+import { SHEFFIELD_PROJECT_ID } from "@/data/sheffield-project";
+import { SHEFFIELD_MENUS } from "@/data/sheffield-parsed";
+import { SheffieldMenusView } from "./sheffield-menus-view";
 
 export default async function ProjectMenusPage({
   params,
@@ -15,6 +18,16 @@ export default async function ProjectMenusPage({
   if (!session?.user) return null;
 
   const { id } = await params;
+
+  if (id === SHEFFIELD_PROJECT_ID) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold">Menus</h2>
+        <SheffieldMenusView menus={SHEFFIELD_MENUS} />
+      </div>
+    );
+  }
+
   const project = await prisma.project.findUnique({
     where: { id },
     include: { organization: true },
@@ -40,7 +53,7 @@ export default async function ProjectMenusPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Menus</h2>
-        <CreateMenuDialog projectId={id} />
+        {project && <CreateMenuDialog projectId={id} />}
       </div>
 
       {menus.length === 0 ? (
