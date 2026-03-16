@@ -1,19 +1,12 @@
-import { auth } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth;
-  const isAuthPage = req.nextUrl.pathname.startsWith("/login") || req.nextUrl.pathname.startsWith("/register");
-
-  if (isAuthPage && isLoggedIn) {
-    return Response.redirect(new URL("/dashboard", req.url));
-  }
-  if (!isAuthPage && !isLoggedIn && req.nextUrl.pathname !== "/") {
-    return Response.redirect(new URL("/login", req.url));
-  }
-  return undefined;
-});
+// Auth is handled in layouts (dashboard + auth) - NOT in middleware.
+// NextAuth auth() fails in Edge middleware on Vercel (returns null for valid sessions).
+// Layouts run on Node.js server where auth() works correctly.
+export default function middleware() {
+  return NextResponse.next();
+}
 
 export const config = {
-  // Exclude API, static assets, and files with extensions (e.g. /logo.png)
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
