@@ -13,8 +13,8 @@ export interface SheffieldDoc {
   sourceFile: string;
 }
 
-// Content loaded from extracted JSON
-import sheffieldData from "../../data/sheffield-extracted.json";
+// Content loaded from extracted JSON (in src for reliable Vercel deployment)
+import sheffieldData from "./sheffield-extracted.json";
 
 const raw = sheffieldData as Record<string, { file: string; content: string }>;
 
