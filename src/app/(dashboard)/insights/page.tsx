@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, ChefHat, UtensilsCrossed, FolderKanban, ListTodo } from "lucide-react";
 import { SHEFFIELD_PROJECT, SHEFFIELD_PROJECT_ID } from "@/data/sheffield-project";
 import { SHEFFIELD_RECIPES, SHEFFIELD_MENUS, SHEFFIELD_INGREDIENTS } from "@/data/sheffield-parsed";
+import { ESTHER_PROJECT, ESTHER_PROJECT_ID } from "@/data/esther-project";
+import { ESTHER_RECIPES, ESTHER_MENUS, ESTHER_INGREDIENTS } from "@/data/esther-parsed";
 import Link from "next/link";
 
 export default async function InsightsPage() {
@@ -34,9 +36,9 @@ export default async function InsightsPage() {
     // Demo mode
   }
 
-  const totalProjects = dbProjects + 1;
-  const totalRecipes = dbRecipes + SHEFFIELD_RECIPES.length;
-  const totalMenus = dbMenus + SHEFFIELD_MENUS.length;
+  const totalProjects = dbProjects + 2;
+  const totalRecipes = dbRecipes + SHEFFIELD_RECIPES.length + ESTHER_RECIPES.length;
+  const totalMenus = dbMenus + SHEFFIELD_MENUS.length + ESTHER_MENUS.length;
   const totalTasks = dbTasks;
 
   return (
@@ -94,6 +96,14 @@ export default async function InsightsPage() {
                   <span className="font-medium">{SHEFFIELD_PROJECT.name}</span>
                   <span className="text-sm text-muted-foreground">
                     {SHEFFIELD_RECIPES.length} recipes · {SHEFFIELD_MENUS.length} menus · {SHEFFIELD_INGREDIENTS.length} ingredients
+                  </span>
+                </div>
+              </Link>
+              <Link href={`/projects/${ESTHER_PROJECT_ID}`} className="block rounded-lg border p-4 transition-colors hover:bg-muted/50">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{ESTHER_PROJECT.name}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {ESTHER_RECIPES.length} recipes · {ESTHER_MENUS.length} menus · {ESTHER_INGREDIENTS.length} ingredients
                   </span>
                 </div>
               </Link>

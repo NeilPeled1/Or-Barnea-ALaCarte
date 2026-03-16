@@ -13,7 +13,7 @@ const dbTabs = [
   { href: "/messages", label: "Messages" },
 ];
 
-const sheffieldTabs = [
+const staticProjectTabs = [
   { href: "", label: "Overview" },
   { href: "/recipes", label: "Recipes" },
   { href: "/menus", label: "Menus" },
@@ -21,8 +21,8 @@ const sheffieldTabs = [
   { href: "/documents", label: "Documents" },
 ];
 
-export function ProjectNav({ base, isSheffield }: { base: string; isSheffield?: boolean }) {
-  const tabs = isSheffield ? sheffieldTabs : dbTabs;
+export function ProjectNav({ base, isStaticProject }: { base: string; isStaticProject?: boolean }) {
+  const tabs = isStaticProject ? staticProjectTabs : dbTabs;
   const pathname = usePathname();
 
   return (

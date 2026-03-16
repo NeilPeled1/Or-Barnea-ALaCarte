@@ -5,6 +5,12 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ProjectNav } from "./project-nav";
 import { SHEFFIELD_PROJECT_ID, SHEFFIELD_PROJECT_NAME, SHEFFIELD_ORG_NAME } from "@/data/sheffield-project";
+import { ESTHER_PROJECT_ID, ESTHER_PROJECT_NAME, ESTHER_ORG_NAME } from "@/data/esther-project";
+
+const STATIC_PROJECTS: Record<string, { name: string; org: string }> = {
+  [SHEFFIELD_PROJECT_ID]: { name: SHEFFIELD_PROJECT_NAME, org: SHEFFIELD_ORG_NAME },
+  [ESTHER_PROJECT_ID]: { name: ESTHER_PROJECT_NAME, org: ESTHER_ORG_NAME },
+};
 
 export default async function ProjectLayout({
   children,
@@ -18,7 +24,8 @@ export default async function ProjectLayout({
 
   const { id } = await params;
 
-  if (id === SHEFFIELD_PROJECT_ID) {
+  const staticProj = STATIC_PROJECTS[id];
+  if (staticProj) {
     const base = `/projects/${id}`;
     return (
       <div className="space-y-6">
@@ -29,10 +36,10 @@ export default async function ProjectLayout({
           >
             ← Back to projects
           </Link>
-          <h1 className="mt-1 text-2xl font-bold">{SHEFFIELD_PROJECT_NAME}</h1>
-          <p className="text-muted-foreground">{SHEFFIELD_ORG_NAME}</p>
+          <h1 className="mt-1 text-2xl font-bold">{staticProj.name}</h1>
+          <p className="text-muted-foreground">{staticProj.org}</p>
         </div>
-        <ProjectNav base={base} isSheffield />
+        <ProjectNav base={base} isStaticProject />
         {children}
       </div>
     );

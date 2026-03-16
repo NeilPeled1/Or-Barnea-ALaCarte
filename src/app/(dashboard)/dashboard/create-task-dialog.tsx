@@ -77,7 +77,7 @@ export function CreateTaskDialog() {
     router.refresh();
   }
 
-  const dbProjects = projects.filter((p) => p.id && !p.id.startsWith("sheffield"));
+  const dbProjects = projects.filter((p) => p.id && !p.id.startsWith("sheffield") && !p.id.startsWith("esther"));
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

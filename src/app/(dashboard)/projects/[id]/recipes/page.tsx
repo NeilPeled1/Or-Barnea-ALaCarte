@@ -9,6 +9,8 @@ import { calculateRecipeCost } from "@/lib/recipe-cost";
 import { CreateRecipeDialog } from "./create-recipe-dialog";
 import { SHEFFIELD_PROJECT_ID } from "@/data/sheffield-project";
 import { SHEFFIELD_RECIPES } from "@/data/sheffield-parsed";
+import { ESTHER_PROJECT_ID } from "@/data/esther-project";
+import { ESTHER_RECIPES } from "@/data/esther-parsed";
 import { SheffieldRecipesView } from "./sheffield-recipes-view";
 
 export default async function ProjectRecipesPage({
@@ -26,6 +28,14 @@ export default async function ProjectRecipesPage({
       <div className="space-y-6">
         <h2 className="text-xl font-semibold">Recipes</h2>
         <SheffieldRecipesView recipes={SHEFFIELD_RECIPES} />
+      </div>
+    );
+  }
+  if (id === ESTHER_PROJECT_ID) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold">Recipes</h2>
+        <SheffieldRecipesView recipes={ESTHER_RECIPES} />
       </div>
     );
   }

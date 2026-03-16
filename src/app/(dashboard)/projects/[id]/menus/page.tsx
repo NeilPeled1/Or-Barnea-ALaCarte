@@ -7,6 +7,8 @@ import { calculateRecipeCost, calculateMenuItemMetrics } from "@/lib/recipe-cost
 import { CreateMenuDialog } from "./create-menu-dialog";
 import { SHEFFIELD_PROJECT_ID } from "@/data/sheffield-project";
 import { SHEFFIELD_MENUS } from "@/data/sheffield-parsed";
+import { ESTHER_PROJECT_ID } from "@/data/esther-project";
+import { ESTHER_MENUS } from "@/data/esther-parsed";
 import { SheffieldMenusView } from "./sheffield-menus-view";
 
 export default async function ProjectMenusPage({
@@ -24,6 +26,14 @@ export default async function ProjectMenusPage({
       <div className="space-y-6">
         <h2 className="text-xl font-semibold">Menus</h2>
         <SheffieldMenusView menus={SHEFFIELD_MENUS} />
+      </div>
+    );
+  }
+  if (id === ESTHER_PROJECT_ID) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold">Menus</h2>
+        <SheffieldMenusView menus={ESTHER_MENUS} />
       </div>
     );
   }

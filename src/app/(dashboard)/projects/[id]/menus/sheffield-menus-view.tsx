@@ -9,7 +9,7 @@ import type { ParsedMenu, ParsedMenuSection, ParsedMenuItem } from "@/data/sheff
 
 export function SheffieldMenusView({ menus }: { menus: ParsedMenu[] }) {
   const [search, setSearch] = useState("");
-  const [collapsedMenus, setCollapsedMenus] = useState<Set<string>>(new Set());
+  const [collapsedMenus, setCollapsedMenus] = useState<Set<string>>(() => new Set(menus.map((m) => m.id)));
 
   const toggleMenu = (id: string) => {
     setCollapsedMenus((prev) => {
@@ -84,7 +84,7 @@ export function SheffieldMenusView({ menus }: { menus: ParsedMenu[] }) {
 }
 
 function CollapsibleMenuSection({ section }: { section: ParsedMenuSection }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   return (
     <div>
       <button

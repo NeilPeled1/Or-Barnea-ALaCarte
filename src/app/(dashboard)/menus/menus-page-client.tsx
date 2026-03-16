@@ -17,7 +17,7 @@ type DbMenu = {
 };
 
 type MenuItem = {
-  type: "db" | "sheffield";
+  type: "db" | "static";
   id: string;
   projectId: string;
   name: string;
@@ -36,10 +36,9 @@ function getMenuType(name: string): string {
   return "Other";
 }
 
-export function MenusPageClient({ dbMenus, sheffieldMenus }: { dbMenus: DbMenu[]; sheffieldMenus: ParsedMenu[] }) {
+export function MenusPageClient({ dbMenus, staticMenus }: { dbMenus: DbMenu[]; staticMenus: ParsedMenu[] }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
 
   const allItems: MenuItem[] = [
     ...dbMenus.map((m) => ({
@@ -52,10 +51,10 @@ export function MenusPageClient({ dbMenus, sheffieldMenus }: { dbMenus: DbMenu[]
       itemCount: m._count?.items ?? 0,
       menuType: getMenuType(m.name),
     })),
-    ...sheffieldMenus.map((m) => ({
-      type: "sheffield" as const,
+    ...staticMenus.map((m) => ({
+      type: "static" as const,
       id: m.id,
-      projectId: "sheffield",
+      projectId: m.projectId,
       name: m.name,
       projectName: m.projectName,
       orgName: m.projectName,
@@ -76,6 +75,8 @@ export function MenusPageClient({ dbMenus, sheffieldMenus }: { dbMenus: DbMenu[]
     acc[key].push(m);
     return acc;
   }, {});
+
+  const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(() => new Set(Object.keys(byProject)));
 
   const toggleProject = (proj: string) => {
     setCollapsedProjects((prev) => {

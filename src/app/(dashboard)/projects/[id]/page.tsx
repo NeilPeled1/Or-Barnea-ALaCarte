@@ -9,6 +9,33 @@ import { ChefHat, UtensilsCrossed, ListTodo, FileText, MessageSquare, BookOpen }
 import { SHEFFIELD_PROJECT_ID, SHEFFIELD_PROJECT } from "@/data/sheffield-project";
 import { SHEFFIELD_RECIPES, SHEFFIELD_MENUS, SHEFFIELD_INGREDIENTS } from "@/data/sheffield-parsed";
 import { SHEFFIELD_DOCS } from "@/data/sheffield-documents";
+import { ESTHER_PROJECT_ID, ESTHER_PROJECT } from "@/data/esther-project";
+import { ESTHER_RECIPES, ESTHER_MENUS, ESTHER_INGREDIENTS } from "@/data/esther-parsed";
+import { ESTHER_DOCS } from "@/data/esther-documents";
+
+const STATIC_PROJECT_DATA: Record<
+  string,
+  { project: typeof SHEFFIELD_PROJECT; recipes: unknown[]; menus: unknown[]; ingredients: unknown[]; docs: unknown[]; description: string }
+> = {
+  [SHEFFIELD_PROJECT_ID]: {
+    project: SHEFFIELD_PROJECT,
+    recipes: SHEFFIELD_RECIPES,
+    menus: SHEFFIELD_MENUS,
+    ingredients: SHEFFIELD_INGREDIENTS,
+    docs: SHEFFIELD_DOCS,
+    description:
+      "Sheffield Bar — culinary consulting project. Includes recipe book 2026, main & dessert menus, product tree & pricing, supplier lists, station checklists, pickup guides, and operational documents. Content in Hebrew with structured recipes, menus, and procedures.",
+  },
+  [ESTHER_PROJECT_ID]: {
+    project: ESTHER_PROJECT,
+    recipes: ESTHER_RECIPES,
+    menus: ESTHER_MENUS,
+    ingredients: ESTHER_INGREDIENTS,
+    docs: ESTHER_DOCS,
+    description:
+      "אסתר בר דיזינגוף — פרויקט ייעוץ קולינרי. כולל ספר מתכונים, תפריטי בוקר/ערב/סלטים, עץ מוצר, הזמנות, צ'קליסטים, פיק אפ, ומסמכי תפעול.",
+  },
+};
 
 export default async function ProjectOverviewPage({
   params,
@@ -20,16 +47,14 @@ export default async function ProjectOverviewPage({
 
   const { id } = await params;
 
-  if (id === SHEFFIELD_PROJECT_ID) {
-    const recipeCount = SHEFFIELD_RECIPES.length;
-    const menuCount = SHEFFIELD_MENUS.length;
-    const ingredientCount = SHEFFIELD_INGREDIENTS.length;
-    const docCount = SHEFFIELD_DOCS.length;
+  const staticData = STATIC_PROJECT_DATA[id];
+  if (staticData) {
+    const { project, recipes, menus, ingredients, docs, description } = staticData;
     const sections = [
-      { href: `recipes`, label: "Recipes", count: recipeCount, icon: ChefHat },
-      { href: `menus`, label: "Menus", count: menuCount, icon: UtensilsCrossed },
-      { href: `ingredients`, label: "Ingredients", count: ingredientCount, icon: BookOpen },
-      { href: `documents`, label: "Documents", count: docCount, icon: FileText },
+      { href: `recipes`, label: "Recipes", count: recipes.length, icon: ChefHat },
+      { href: `menus`, label: "Menus", count: menus.length, icon: UtensilsCrossed },
+      { href: `ingredients`, label: "Ingredients", count: ingredients.length, icon: BookOpen },
+      { href: `documents`, label: "Documents", count: docs.length, icon: FileText },
     ];
     return (
       <div className="space-y-6">
@@ -37,11 +62,9 @@ export default async function ProjectOverviewPage({
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Overview</CardTitle>
-              <Badge>{SHEFFIELD_PROJECT.status}</Badge>
+              <Badge>{project.status}</Badge>
             </div>
-            <p className="text-muted-foreground">
-              Sheffield Bar — culinary consulting project. Includes recipe book 2026, main & dessert menus, product tree & pricing, supplier lists, station checklists, pickup guides, and operational documents. Content in Hebrew with structured recipes, menus, and procedures.
-            </p>
+            <p className="text-muted-foreground">{description}</p>
           </CardHeader>
         </Card>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

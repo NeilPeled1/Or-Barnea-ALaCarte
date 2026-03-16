@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateRecipeCost } from "@/lib/recipe-cost";
 import { SHEFFIELD_RECIPES } from "@/data/sheffield-parsed";
+import { ESTHER_RECIPES } from "@/data/esther-parsed";
 import { RecipesPageClient } from "./recipes-page";
 
 export default async function RecipesPage() {
@@ -26,10 +27,12 @@ export default async function RecipesPage() {
     return { ...r, cost: calculateRecipeCost(ri as Parameters<typeof calculateRecipeCost>[0]) };
   });
 
+  const staticRecipes = [...SHEFFIELD_RECIPES, ...ESTHER_RECIPES];
+
   return (
     <RecipesPageClient
       dbRecipes={dbWithCost}
-      sheffieldRecipes={SHEFFIELD_RECIPES}
+      sheffieldRecipes={staticRecipes}
     />
   );
 }

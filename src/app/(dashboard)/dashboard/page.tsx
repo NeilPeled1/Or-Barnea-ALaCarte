@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { FolderKanban, ChefHat, UtensilsCrossed, ListTodo, Plus } from "lucide-react";
 import { SHEFFIELD_PROJECT_ID, SHEFFIELD_PROJECT } from "@/data/sheffield-project";
 import { SHEFFIELD_RECIPES, SHEFFIELD_MENUS } from "@/data/sheffield-parsed";
+import { ESTHER_PROJECT_ID, ESTHER_PROJECT } from "@/data/esther-project";
+import { ESTHER_RECIPES, ESTHER_MENUS } from "@/data/esther-parsed";
 import { CreateTaskDialog } from "./create-task-dialog";
 
 export default async function DashboardPage() {
@@ -59,16 +61,19 @@ export default async function DashboardPage() {
       });
       recentProjects = [
         { id: SHEFFIELD_PROJECT_ID, name: SHEFFIELD_PROJECT.name, organization: { name: SHEFFIELD_PROJECT.organizationName }, status: SHEFFIELD_PROJECT.status, updatedAt: new Date() },
+        { id: ESTHER_PROJECT_ID, name: ESTHER_PROJECT.name, organization: { name: ESTHER_PROJECT.organizationName }, status: ESTHER_PROJECT.status, updatedAt: new Date() },
         ...dbRecent,
       ].slice(0, 5);
     } catch {
       recentProjects = [
         { id: SHEFFIELD_PROJECT_ID, name: SHEFFIELD_PROJECT.name, organization: { name: SHEFFIELD_PROJECT.organizationName }, status: SHEFFIELD_PROJECT.status, updatedAt: new Date() },
+        { id: ESTHER_PROJECT_ID, name: ESTHER_PROJECT.name, organization: { name: ESTHER_PROJECT.organizationName }, status: ESTHER_PROJECT.status, updatedAt: new Date() },
       ];
     }
   } else {
     recentProjects = [
       { id: SHEFFIELD_PROJECT_ID, name: SHEFFIELD_PROJECT.name, organization: { name: SHEFFIELD_PROJECT.organizationName }, status: SHEFFIELD_PROJECT.status, updatedAt: new Date() },
+      { id: ESTHER_PROJECT_ID, name: ESTHER_PROJECT.name, organization: { name: ESTHER_PROJECT.organizationName }, status: ESTHER_PROJECT.status, updatedAt: new Date() },
     ];
   }
 

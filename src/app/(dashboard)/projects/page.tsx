@@ -7,6 +7,8 @@ import { CreateProjectDialog } from "./create-project-dialog";
 import { CreateOrganizationDialog } from "./create-organization-dialog";
 import { SHEFFIELD_PROJECT } from "@/data/sheffield-project";
 import { SHEFFIELD_RECIPES, SHEFFIELD_MENUS } from "@/data/sheffield-parsed";
+import { ESTHER_PROJECT } from "@/data/esther-project";
+import { ESTHER_RECIPES, ESTHER_MENUS } from "@/data/esther-parsed";
 import { ProjectsList } from "./projects-list";
 
 export default async function ProjectsPage() {
@@ -45,7 +47,17 @@ export default async function ProjectsPage() {
     },
   };
 
-  const projects = [sheffieldWithCounts, ...dbProjects];
+  const estherWithCounts = {
+    ...ESTHER_PROJECT,
+    organization: { name: ESTHER_PROJECT.organizationName },
+    _count: {
+      tasks: 0,
+      recipes: ESTHER_RECIPES.length,
+      menus: ESTHER_MENUS.length,
+    },
+  };
+
+  const projects = [sheffieldWithCounts, estherWithCounts, ...dbProjects];
 
   return (
     <div className="space-y-6">
