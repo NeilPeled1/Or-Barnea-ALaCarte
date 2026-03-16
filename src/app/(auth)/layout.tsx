@@ -6,7 +6,12 @@ export default async function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  let session;
+  try {
+    session = await auth();
+  } catch {
+    // Auth config error - show login form
+  }
   if (session?.user) redirect("/dashboard");
   return <>{children}</>;
 }

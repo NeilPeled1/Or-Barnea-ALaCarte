@@ -7,6 +7,7 @@
   },
   "scripts": {
     "setup:vercel": "bash scripts/setup-vercel-env.sh",
+    "add-auth-secret": "bash scripts/add-auth-secret.sh",
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",

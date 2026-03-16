@@ -5,7 +5,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default async function HomePage() {
-  const session = await auth();
+  let session;
+  try {
+    session = await auth();
+  } catch {
+    // Auth config error - show landing
+  }
   if (session?.user) redirect("/dashboard");
 
   return (
