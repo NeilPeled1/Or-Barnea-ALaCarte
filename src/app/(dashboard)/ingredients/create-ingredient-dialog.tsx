@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,45 +14,75 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus } from "lucide-react";
 
-export function CreateIngredientDialog() {
+const UNIT_OPTIONS = ["kg", "g", "L", "ml", "unit", "oz", "lb", "each", "bunch"];
+
+export function CreateIngredientDialog({ existingSuppliers = [] }: { existingSuppliers?: string[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [unit, setUnit] = useState("");
+  const [unit, setUnit] = useState("kg");
   const [costPerUnit, setCostPerUnit] = useState("");
   const [supplier, setSupplier] = useState("");
+  const [suppliers, setSuppliers] = useState<string[]>(existingSuppliers);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (open && suppliers.length === 0) {
+      fetch("/api/ingredients")
+        .then((r) => (r.ok ? r.json() : []))
+        .then((ings: { supplier?: string | null }[]) => {
+          const s = [...new Set(ings.map((i) => i.supplier).filter(Boolean) as string[])].sort();
+          setSuppliers(s);
+        })
+        .catch(() => {});
+    }
+  }, [open, suppliers.length]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const res = await fetch("/api/ingredients", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        unit,
-        costPerUnit: parseFloat(costPerUnit) || 0,
-        supplier: supplier || undefined,
-      }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) {
-      setError(data.error ?? "Failed to create ingredient");
-      return;
+    try {
+      const res = await fetch("/api/ingredients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          unit,
+          costPerUnit: parseFloat(costPerUnit) || 0,
+          supplier: supplier || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Failed to create ingredient");
+        setLoading(false);
+        return;
+      }
+      setOpen(false);
+      setName("");
+      setUnit("kg");
+      setCostPerUnit("");
+      setSupplier("");
+      router.refresh();
+    } catch (err) {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setOpen(false);
-    setName("");
-    setUnit("");
-    setCostPerUnit("");
-    setSupplier("");
-    router.refresh();
   }
+
+  const allSuppliers = [...new Set([...suppliers, ...existingSuppliers])].sort();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -81,13 +111,16 @@ export function CreateIngredientDialog() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="unit">Unit</Label>
-                <Input
-                  id="unit"
-                  value={unit}
-                  onChange={(e) => setUnit(e.target.value)}
-                  placeholder="e.g. kg, g, oz"
-                  required
-                />
+                <Select value={unit} onValueChange={setUnit}>
+                  <SelectTrigger id="unit">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {UNIT_OPTIONS.map((u) => (
+                      <SelectItem key={u} value={u}>{u}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="cost">Cost per unit</Label>
@@ -106,9 +139,16 @@ export function CreateIngredientDialog() {
               <Label htmlFor="supplier">Supplier</Label>
               <Input
                 id="supplier"
+                list="create-ingredient-suppliers"
                 value={supplier}
                 onChange={(e) => setSupplier(e.target.value)}
+                placeholder="Type or select from existing"
               />
+              <datalist id="create-ingredient-suppliers">
+                {allSuppliers.map((s) => (
+                  <option key={s} value={s} />
+                ))}
+              </datalist>
             </div>
             {error && (
               <p className="text-sm text-destructive">{error}</p>

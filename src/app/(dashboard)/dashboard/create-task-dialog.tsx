@@ -48,13 +48,14 @@ export function CreateTaskDialog() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!projectId) {
-      setError("Please select a project");
+    const targetProjectId = projectId || dbProjects.find((p) => p.name === "General")?.id;
+    if (!targetProjectId) {
+      setError("Please create a project first, or run database seed to add a General project.");
       return;
     }
     setError("");
     setLoading(true);
-    const res = await fetch(`/api/projects/${projectId}/tasks`, {
+    const res = await fetch(`/api/projects/${targetProjectId}/tasks`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -78,6 +79,9 @@ export function CreateTaskDialog() {
   }
 
   const dbProjects = projects.filter((p) => p.id && !p.id.startsWith("sheffield") && !p.id.startsWith("esther"));
+  const generalProject = dbProjects.find((p) => p.name === "General");
+  const otherProjects = dbProjects.filter((p) => p.name !== "General");
+  const canCreate = dbProjects.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -91,26 +95,28 @@ export function CreateTaskDialog() {
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create Task</DialogTitle>
-            <DialogDescription>Add a new task to a project.</DialogDescription>
+            <DialogDescription>Add a new task. You can assign it to a project or leave unassigned.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="project">Project</Label>
               <Select value={projectId} onValueChange={setProjectId}>
                 <SelectTrigger id="project">
-                  <SelectValue placeholder="Select project" />
+                  <SelectValue placeholder="Select project (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  {dbProjects.length === 0 ? (
+                  {generalProject && (
+                    <SelectItem value={generalProject.id}>No project</SelectItem>
+                  )}
+                  {otherProjects.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                  {!canCreate && (
                     <SelectItem value="_none" disabled>
                       No projects yet — create a project first
                     </SelectItem>
-                  ) : (
-                    dbProjects.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))
                   )}
                 </SelectContent>
               </Select>
@@ -150,7 +156,7 @@ export function CreateTaskDialog() {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || dbProjects.length === 0}>
+            <Button type="submit" disabled={loading || !canCreate}>
               {loading ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>

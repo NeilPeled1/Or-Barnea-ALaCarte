@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -12,6 +13,14 @@ import {
 } from "@/components/ui/table";
 import { SearchInput } from "@/components/search-input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ChevronDown, ChevronRight, Eye, EyeOff } from "lucide-react";
 import type { ParsedIngredient } from "@/data/sheffield-parsed";
 
@@ -30,9 +39,12 @@ type IngredientRow = {
   cost: string;
   supplier: string;
   projectName: string;
+  isDb?: boolean;
 };
 
 const COLUMNS = ["name", "unit", "cost", "supplier", "project"] as const;
+
+const UNIT_OPTIONS = ["kg", "g", "L", "ml", "unit", "oz", "lb", "each", "bunch"];
 
 export function IngredientsPageClient({
   dbIngredients,
@@ -43,6 +55,10 @@ export function IngredientsPageClient({
   sheffieldIngredients: ParsedIngredient[];
   createButton?: React.ReactNode;
 }) {
+  const allSuppliers = [...new Set([
+    ...dbIngredients.map((i) => i.supplier).filter(Boolean) as string[],
+    ...sheffieldIngredients.map((i) => i.supplier).filter(Boolean) as string[],
+  ])].sort();
   const [search, setSearch] = useState("");
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set());
   const [collapsedProjects, setCollapsedProjects] = useState<Set<string>>(new Set());
@@ -73,6 +89,7 @@ export function IngredientsPageClient({
       cost: `$${Number(i.costPerUnit).toFixed(2)}`,
       supplier: i.supplier ?? "—",
       projectName: "—",
+      isDb: true,
     })),
     ...sheffieldIngredients.map((i) => ({
       id: i.id,
@@ -81,6 +98,7 @@ export function IngredientsPageClient({
       cost: i.cost != null ? `₪${i.cost.toFixed(2)}` : "—",
       supplier: i.supplier ?? "—",
       projectName: i.projectName,
+      isDb: false,
     })),
   ];
 
@@ -148,25 +166,19 @@ export function IngredientsPageClient({
                 {!isCollapsed && (
                   <CardContent className="pt-0">
                     <div className="overflow-x-auto">
-                      <Table>
+                      <Table className="table-fixed">
                         <TableHeader>
-                          <TableRow>
-                            {!hiddenCols.has("name") && <TableHead>Name</TableHead>}
-                            {!hiddenCols.has("unit") && <TableHead>Unit</TableHead>}
-                            {!hiddenCols.has("cost") && <TableHead className="text-right">Cost</TableHead>}
-                            {!hiddenCols.has("supplier") && <TableHead>Supplier</TableHead>}
-                            {!hiddenCols.has("project") && <TableHead>Project</TableHead>}
+                          <TableRow className="[&>th]:px-2 [&>th]:py-1.5 [&>th]:whitespace-nowrap">
+                            {!hiddenCols.has("name") && <TableHead className="w-[min(120px,20%)]">Name</TableHead>}
+                            {!hiddenCols.has("unit") && <TableHead className="w-[60px]">Unit</TableHead>}
+                            {!hiddenCols.has("cost") && <TableHead className="w-[70px] text-right">Cost</TableHead>}
+                            {!hiddenCols.has("supplier") && <TableHead className="w-[min(100px,18%)]">Supplier</TableHead>}
+                            {!hiddenCols.has("project") && <TableHead className="w-[min(100px,18%)]">Project</TableHead>}
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {rows.map((i) => (
-                            <TableRow key={i.id}>
-                              {!hiddenCols.has("name") && <TableCell className="font-medium">{i.name}</TableCell>}
-                              {!hiddenCols.has("unit") && <TableCell>{i.unit}</TableCell>}
-                              {!hiddenCols.has("cost") && <TableCell className="text-right">{i.cost}</TableCell>}
-                              {!hiddenCols.has("supplier") && <TableCell className="text-muted-foreground">{i.supplier}</TableCell>}
-                              {!hiddenCols.has("project") && <TableCell className="text-muted-foreground">{i.projectName}</TableCell>}
-                            </TableRow>
+                            <IngredientRowCell key={i.id} row={i} hiddenCols={hiddenCols} suppliers={allSuppliers} />
                           ))}
                         </TableBody>
                       </Table>
@@ -179,5 +191,113 @@ export function IngredientsPageClient({
         </div>
       )}
     </div>
+  );
+}
+
+function IngredientRowCell({
+  row,
+  hiddenCols,
+  suppliers,
+}: {
+  row: IngredientRow;
+  hiddenCols: Set<string>;
+  suppliers: string[];
+}) {
+  const router = useRouter();
+  const [name, setName] = useState(row.name);
+  const [unit, setUnit] = useState(row.unit);
+  const [cost, setCost] = useState(row.cost.replace(/[^0-9.]/g, ""));
+  const [supplier, setSupplier] = useState(row.supplier === "—" ? "" : row.supplier);
+  const [saving, setSaving] = useState(false);
+
+  const save = useCallback(
+    async (updates: { name?: string; unit?: string; costPerUnit?: number; supplier?: string }) => {
+      if (!row.isDb) return;
+      setSaving(true);
+      const res = await fetch(`/api/ingredients/${row.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      setSaving(false);
+      if (res.ok) router.refresh();
+    },
+    [row.id, row.isDb, router]
+  );
+
+  if (!row.isDb) {
+    return (
+      <TableRow className="[&>td]:px-2 [&>td]:py-1">
+        {!hiddenCols.has("name") && <TableCell className="font-medium">{row.name}</TableCell>}
+        {!hiddenCols.has("unit") && <TableCell>{row.unit}</TableCell>}
+        {!hiddenCols.has("cost") && <TableCell className="text-right">{row.cost}</TableCell>}
+        {!hiddenCols.has("supplier") && <TableCell className="text-muted-foreground">{row.supplier}</TableCell>}
+        {!hiddenCols.has("project") && <TableCell className="text-muted-foreground">{row.projectName}</TableCell>}
+      </TableRow>
+    );
+  }
+
+  return (
+    <TableRow className="[&>td]:px-2 [&>td]:py-1">
+      {!hiddenCols.has("name") && (
+        <TableCell>
+          <Input
+            className="h-8 text-sm"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={() => name !== row.name && save({ name })}
+          />
+        </TableCell>
+      )}
+      {!hiddenCols.has("unit") && (
+        <TableCell>
+          <Select value={UNIT_OPTIONS.includes(unit) ? unit : "unit"} onValueChange={(v) => { setUnit(v); save({ unit: v }); }}>
+            <SelectTrigger className="h-8 text-sm min-w-[60px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(UNIT_OPTIONS.includes(unit) ? UNIT_OPTIONS : [unit, ...UNIT_OPTIONS]).map((u) => (
+                <SelectItem key={u} value={u}>{u}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </TableCell>
+      )}
+      {!hiddenCols.has("cost") && (
+        <TableCell className="text-right">
+          <Input
+            className="h-8 w-16 text-right text-sm"
+            type="number"
+            step="0.01"
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+            onBlur={() => {
+              const n = parseFloat(cost);
+              if (!isNaN(n) && n >= 0) save({ costPerUnit: n });
+            }}
+          />
+        </TableCell>
+      )}
+      {!hiddenCols.has("supplier") && (
+        <TableCell>
+          <Input
+            className="h-8 text-sm"
+            list={`suppliers-${row.id}`}
+            value={supplier}
+            onChange={(e) => setSupplier(e.target.value)}
+            onBlur={() => save({ supplier: supplier || undefined })}
+            placeholder="Type or select supplier"
+          />
+          <datalist id={`suppliers-${row.id}`}>
+            {suppliers.map((s) => (
+              <option key={s} value={s} />
+            ))}
+          </datalist>
+        </TableCell>
+      )}
+      {!hiddenCols.has("project") && (
+        <TableCell className="text-muted-foreground">{row.projectName}</TableCell>
+      )}
+    </TableRow>
   );
 }

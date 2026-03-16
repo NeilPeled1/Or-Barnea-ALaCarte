@@ -19,13 +19,19 @@ export default async function IngredientsPage() {
   }
 
   const staticIngredients = [...SHEFFIELD_INGREDIENTS, ...ESTHER_INGREDIENTS];
+  const existingSuppliers = [
+    ...new Set([
+      ...dbIngredients.map((i) => i.supplier).filter(Boolean) as string[],
+      ...staticIngredients.map((i) => i.supplier).filter(Boolean) as string[],
+    ]),
+  ].sort();
 
   return (
     <div className="space-y-6">
       <IngredientsPageClient
         dbIngredients={dbIngredients}
         sheffieldIngredients={staticIngredients}
-        createButton={session.user.role === "ADMIN" ? <CreateIngredientDialog /> : undefined}
+        createButton={session.user.role === "ADMIN" ? <CreateIngredientDialog existingSuppliers={existingSuppliers} /> : undefined}
       />
     </div>
   );

@@ -73,6 +73,20 @@ async function main() {
     });
   }
 
+  let generalProj = await prisma.project.findFirst({
+    where: { name: "General", organizationId: org.id },
+  });
+  if (!generalProj) {
+    generalProj = await prisma.project.create({
+      data: {
+        name: "General",
+        description: "Tasks not assigned to a specific project",
+        status: "active",
+        organizationId: org.id,
+      },
+    });
+  }
+
   const ingredientNames = [
     { name: "Chicken breast", unit: "kg", costPerUnit: 8.5, supplier: "Local Farm" },
     { name: "Olive oil", unit: "L", costPerUnit: 12, supplier: "Bulk Foods" },

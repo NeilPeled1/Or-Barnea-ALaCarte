@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChefHat, UtensilsCrossed, ListTodo, FileText, MessageSquare, BookOpen } from "lucide-react";
+import { ChefHat, UtensilsCrossed, ListTodo, FileText, MessageSquare, BookOpen, BarChart3, DollarSign } from "lucide-react";
 import { SHEFFIELD_PROJECT_ID, SHEFFIELD_PROJECT } from "@/data/sheffield-project";
 import { SHEFFIELD_RECIPES, SHEFFIELD_MENUS, SHEFFIELD_INGREDIENTS } from "@/data/sheffield-parsed";
 import { SHEFFIELD_DOCS } from "@/data/sheffield-documents";
@@ -50,6 +50,14 @@ export default async function ProjectOverviewPage({
   const staticData = STATIC_PROJECT_DATA[id];
   if (staticData) {
     const { project, recipes, menus, ingredients, docs, description } = staticData;
+    const menuItemsCount = (menus as { sections?: { items?: unknown[] }[] }[]).reduce(
+      (acc, m) => acc + (m.sections?.reduce((a, s) => a + (s.items?.length ?? 0), 0) ?? 0),
+      0
+    );
+    const estimatedCost = (ingredients as { cost?: number }[]).reduce(
+      (acc, i) => acc + (i.cost ?? 0),
+      0
+    );
     const sections = [
       { href: `recipes`, label: "Recipes", count: recipes.length, icon: ChefHat },
       { href: `menus`, label: "Menus", count: menus.length, icon: UtensilsCrossed },
@@ -82,6 +90,39 @@ export default async function ProjectOverviewPage({
             </Link>
           ))}
         </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">Dishes (recipes)</p>
+                <p className="text-2xl font-bold">{recipes.length}</p>
+              </div>
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">Menu items</p>
+                <p className="text-2xl font-bold">{menuItemsCount}</p>
+              </div>
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">Ingredients</p>
+                <p className="text-2xl font-bold">{ingredients.length}</p>
+              </div>
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <DollarSign className="h-4 w-4" />
+                  Est. inventory cost
+                </p>
+                <p className="text-2xl font-bold">
+                  {estimatedCost > 0 ? `₪${estimatedCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : "—"}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -139,6 +180,35 @@ export default async function ProjectOverviewPage({
           </Link>
         ))}
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Insights
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <p className="text-sm text-muted-foreground">Recipes</p>
+              <p className="text-2xl font-bold">{project._count.recipes}</p>
+            </div>
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <p className="text-sm text-muted-foreground">Menus</p>
+              <p className="text-2xl font-bold">{project._count.menus}</p>
+            </div>
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <p className="text-sm text-muted-foreground">Tasks</p>
+              <p className="text-2xl font-bold">{project._count.tasks}</p>
+            </div>
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <p className="text-sm text-muted-foreground">Files</p>
+              <p className="text-2xl font-bold">{project._count.files}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
