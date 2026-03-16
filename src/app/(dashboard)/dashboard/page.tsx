@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FolderKanban, ChefHat, UtensilsCrossed, ListTodo } from "lucide-react";
+import { FolderKanban, ChefHat, UtensilsCrossed, ListTodo, BookOpen } from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="border-border/50 transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Projects</CardTitle>
             <FolderKanban className="h-4 w-4 text-muted-foreground" />
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
             <div className="text-2xl font-bold">{projects}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Recipes</CardTitle>
             <ChefHat className="h-4 w-4 text-muted-foreground" />
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
             <div className="text-2xl font-bold">{recipes}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Menus</CardTitle>
             <UtensilsCrossed className="h-4 w-4 text-muted-foreground" />
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
             <div className="text-2xl font-bold">{menus}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/50 transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Tasks</CardTitle>
             <ListTodo className="h-4 w-4 text-muted-foreground" />
@@ -99,10 +99,11 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="border-border/50">
         <CardHeader>
           <CardTitle>Recent Projects</CardTitle>
-          <CardContent className="pt-0">
+        </CardHeader>
+        <CardContent className="pt-0">
             {recentProjects.length === 0 ? (
               <p className="text-muted-foreground">No projects yet.</p>
             ) : (
@@ -122,11 +123,18 @@ export default async function DashboardPage() {
                 ))}
               </ul>
             )}
-            <Button asChild className="mt-4">
-              <Link href="/projects">View all projects</Link>
-            </Button>
-          </CardContent>
-        </CardHeader>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild>
+                <Link href="/projects">View all projects</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/sheffield" className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  Sheffield Bar docs
+                </Link>
+              </Button>
+            </div>
+        </CardContent>
       </Card>
     </div>
   );
