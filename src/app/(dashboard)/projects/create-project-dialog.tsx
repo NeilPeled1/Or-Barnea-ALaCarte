@@ -36,10 +36,12 @@ export function CreateProjectDialog({ className }: { className?: string }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/organizations")
-      .then((r) => r.json())
-      .then((data) => setOrgs(Array.isArray(data) ? data : []))
-      .catch(() => setOrgs([]));
+    if (open) {
+      fetch("/api/organizations")
+        .then((r) => (r.ok ? r.json() : []))
+        .then((data) => setOrgs(Array.isArray(data) ? data : []))
+        .catch(() => setOrgs([]));
+    }
   }, [open]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -52,7 +54,7 @@ export function CreateProjectDialog({ className }: { className?: string }) {
       body: JSON.stringify({
         name,
         description: description || undefined,
-        organizationId: organizationId || orgs[0]?.id,
+        organizationId: organizationId || orgs[0]?.id || "",
       }),
     });
     const data = await res.json();
@@ -94,22 +96,28 @@ export function CreateProjectDialog({ className }: { className?: string }) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="org">Organization</Label>
-              <Select
-                value={organizationId || orgs[0]?.id}
-                onValueChange={setOrganizationId}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select organization" />
-                </SelectTrigger>
-                <SelectContent>
-                  {orgs.map((o) => (
-                    <SelectItem key={o.id} value={o.id}>
-                      {o.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {orgs.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Create an organization first from the Projects page.
+                </p>
+              ) : (
+                <Select
+                  value={organizationId || orgs[0]?.id || ""}
+                  onValueChange={setOrganizationId}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select organization" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {orgs.map((o) => (
+                      <SelectItem key={o.id} value={o.id}>
+                        {o.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>

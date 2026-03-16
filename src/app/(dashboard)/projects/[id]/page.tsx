@@ -40,7 +40,7 @@ export default async function ProjectOverviewPage({
               <Badge>{SHEFFIELD_PROJECT.status}</Badge>
             </div>
             <p className="text-muted-foreground">
-              Sheffield Bar project documents — recipes, menus, ingredients & procedures
+              Sheffield Bar — culinary consulting project. Includes recipe book 2026, main & dessert menus, product tree & pricing, supplier lists, station checklists, pickup guides, and operational documents. Content in Hebrew with structured recipes, menus, and procedures.
             </p>
           </CardHeader>
         </Card>

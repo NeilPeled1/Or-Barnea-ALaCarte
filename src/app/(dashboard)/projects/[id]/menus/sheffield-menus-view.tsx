@@ -2,11 +2,23 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/search-input";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import type { ParsedMenu, ParsedMenuSection, ParsedMenuItem } from "@/data/sheffield-parsed";
 
 export function SheffieldMenusView({ menus }: { menus: ParsedMenu[] }) {
   const [search, setSearch] = useState("");
+  const [collapsedMenus, setCollapsedMenus] = useState<Set<string>>(new Set());
+
+  const toggleMenu = (id: string) => {
+    setCollapsedMenus((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const filteredMenus = menus.map((menu) => ({
     ...menu,
@@ -30,21 +42,36 @@ export function SheffieldMenusView({ menus }: { menus: ParsedMenu[] }) {
         placeholder="Search menu items..."
         className="max-w-sm"
       />
-      {filteredMenus.map((menu) => (
-        <Card key={menu.id} className="overflow-hidden">
-          <CardHeader>
-            <CardTitle>{menu.name}</CardTitle>
-            <p className="text-sm text-muted-foreground">{menu.projectName}</p>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-8">
-              {menu.sections.map((section) => (
-                <MenuSection key={section.title} section={section} />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+      {filteredMenus.map((menu) => {
+        const isCollapsed = collapsedMenus.has(menu.id);
+        return (
+          <Card key={menu.id} className="overflow-hidden">
+            <CardHeader
+              className="cursor-pointer select-none"
+              onClick={() => toggleMenu(menu.id)}
+            >
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+                <div>
+                  <CardTitle>{menu.name}</CardTitle>
+                  <p className="text-sm text-muted-foreground">{menu.projectName}</p>
+                </div>
+              </div>
+            </CardHeader>
+            {!isCollapsed && (
+              <CardContent className="pt-0">
+                <div className="space-y-8">
+                  {menu.sections.map((section) => (
+                    <CollapsibleMenuSection key={section.title} section={section} />
+                  ))}
+                </div>
+              </CardContent>
+            )}
+          </Card>
+        );
+      })}
       {filteredMenus.length === 0 && (
         <Card>
           <CardContent className="py-16 text-center text-muted-foreground">
@@ -56,17 +83,25 @@ export function SheffieldMenusView({ menus }: { menus: ParsedMenu[] }) {
   );
 }
 
-function MenuSection({ section }: { section: ParsedMenuSection }) {
+function CollapsibleMenuSection({ section }: { section: ParsedMenuSection }) {
+  const [collapsed, setCollapsed] = useState(false);
   return (
     <div>
-      <h3 className="mb-4 border-b pb-2 text-lg font-semibold uppercase tracking-wide text-muted-foreground">
+      <button
+        type="button"
+        onClick={() => setCollapsed(!collapsed)}
+        className="mb-4 flex w-full items-center gap-2 border-b pb-2 text-left text-lg font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+      >
+        {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         {section.title}
-      </h3>
-      <div className="space-y-4" dir="rtl">
-        {section.items.map((item, i) => (
-          <MenuItemRow key={i} item={item} />
-        ))}
-      </div>
+      </button>
+      {!collapsed && (
+        <div className="space-y-4" dir="rtl">
+          {section.items.map((item, i) => (
+            <MenuItemRow key={i} item={item} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
